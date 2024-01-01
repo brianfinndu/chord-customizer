@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *
+        {
+            font-family: monospace;
+        }
+        div
+        {
+            padding: 4px;
+            margin: 4px;
+        }
+
+        input
+        {
+            padding: 4px;
+            margin: 4px;
+            margin-bottom: 0px;
+        }
+
+        p
+        {
+            padding: 0px;
+            margin: 0px;
+            margin-bottom: 4px;
+        }
+        
+        #quality_selectors
+        {
+            display: flex;
+            padding-top: 0px;
+            padding-left: 0px;
+        }
+
+        #duration
+        {
+            margin-bottom: 5px;
+            margin-top: 0px;
+        }
+
+        #middle, #bottom
+        {
+            display: flex;
+        }
+
+        #middle_left, #bottom_left
+        {
+            border-right: 1px solid #000
+        }
+    </style>
+
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"
+        integrity="sha512-jduERlz7En1IUZR54bqzpNI64AbffZWR//KJgF71SJ8D8/liKFZ+s1RxmUmB+bhCnIfzebdZsULwOrbVB5f3nQ=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer">
+    </script>
+</head>
+<body>
+    <h2>Saved Songs:</h2>
+    <div id="song_list_container">
+        <ol id="song_list">
+
+        </ol>
+    </div>
+    <div>
+        <input type="text" id="load_index" placeholder="Number" size="6"/>
+        <button type="button" id="load_btn">Load Song</button>
+    </div>
+
+    <div>
+        <input type="text" id="remove_song_index" placeholder="Number" size="6"/>
+        <button type="button" id="remove_song_btn">Remove Song</button>
+    </div>
+    <div>
+        
+        <button type="button" id="new_btn">New Song</button>
+    </div>
+
+    <hr>
+
+    <div id="middle">
+        <div id="middle_left">
+            <h2>Current Chord:</h2>
+            <div>
+                <input type="text" id="root_note" placeholder="Root Note" size="10"/>
+                <input type="text" id="root_octave" placeholder="Octave" size="6"/>    
+            </div>
+            
+            <div id="quality_selectors">
+                <div>
+                    <p>Quality:</p>
+                    <input type="radio" id="diminished" class="quality_buttons" name="quality" value="dim">
+                    <label for="diminished">Diminished</label><br>
+                    <input type="radio" id="minor" class="quality_buttons" name="quality" value="min">
+                    <label for="minor">Minor</label><br>
+                    <input type="radio" id="major" class="quality_buttons" name="quality" value="maj">
+                    <label for="major">Major</label><br>
+                    <input type="radio" id="augmented" class="quality_buttons" name="quality" value="aug">
+                    <label for="augmented">Augmented</label><br>    
+                </div>
+
+                <div>
+                    <p>Seventh:</p>
+                    <input type="radio" id="no_seventh" class="seventh_buttons" name="seventh" value="none">
+                    <label for="no_seventh">None</label><br>
+                    <input type="radio" id="diminished_seventh" class="seventh_buttons" name="seventh" value="dim">
+                    <label for="diminished_seventh">Diminished</label><br>
+                    <input type="radio" id="minor_seventh" class="seventh_buttons" name="seventh" value="min">
+                    <label for="minor_seventh">Minor</label><br>
+                    <input type="radio" id="major_seventh" class="seventh_buttons" name="seventh" value="maj">
+                    <label for="major_seventh">Major</label><br>
+                </div>
+
+                <div>
+                    <p>Inversion:</p>
+                    <input type="radio" id="inversion_0" class="inversion_buttons" name="inversion" value="0">
+                    <label for="inversion_0">Root Position</label><br>
+                    <input type="radio" id="inversion_1" class="inversion_buttons" name="inversion" value="1">
+                    <label for="inversion_1">First Inversion</label><br>
+                    <input type="radio" id="inversion_2" class="inversion_buttons" name="inversion" value="2">
+                    <label for="inversion_2">Second Inversion</label><br>
+                    <input type="radio" id="inversion_3" class="inversion_buttons" name="inversion" value="3">
+                    <label for="inversion_3">Third Inversion</label><br>
+                </div>
+            </div>
+            
+            <div>
+                <button type="button" id="play_btn">Play Chord</button>
+            </div>
+        </div>
+
+        <div id="middle_right">
+            <h2>Chord Operations:</h2>
+
+            <div>
+                Add <input type="text" id="add_duration" size="5"/> beats of the current chord 
+                starting at measure <input type="text" id="add_starting_measure" size="5"/> beat
+                <input type="text" id="add_starting_beat" size="5"/>
+
+                <p></p>
+                
+                <p id="add_to_end">(Click here to add at the end)</p>
+            </div>
+
+            <div>
+                <button type="button" id="add_btn">Add Beats</button>
+            </div>
+
+            <br>
+
+            <div>
+                Replace <input type="text" id="replace_duration" size="5"/> beats with the current chord
+                starting at measure <input type="text" id="replace_starting_measure" size="5"/>
+                beat <input type="text" id="replace_starting_beat" size="5"/>
+            </div>
+
+            <div>
+                <button type="button" id="replace_btn">Replace Beats</button>
+            </div>
+
+            <br>
+        </div>
+    </div>
+
+    <hr>
+    <div id="bottom">
+        <div id="bottom_left">
+            <h2>Current Song:</h2>
+            <div id="current_song_text">
+                <p></p>
+            </div>
+
+            <div>
+                <p id="current_tempo_text">Tempo: 60</p>
+                <input type="text" id="new_tempo" placeholder="New Tempo" size="10"/>
+                <button type="button" id="update_tempo_btn">Update Tempo</button>
+            </div>
+
+            <div>
+                <p id="current_time_sig_text">Beats Per Measure: 4</p>
+                <input type="text" id="new_time_sig" placeholder="New Beats" size="10"/>
+                <button type="button" id="update_time_sig_btn">Update Beats</button>
+            </div>
+
+            <div>
+                <input type="text" id="title" placeholder="Title" size="25 3"/>
+                <button type="button" id="play_song_btn">Play Song</button>
+                <button type="button" id="save_btn">Save Song</button>
+            </div>
+        </div>
+
+        <div id="bottom_right">
+            <h2>Song Operations:</h2>
+
+            <div>
+                Delete <input type="text" id="delete_duration" size="5"/> beats starting at
+                measure <input type="text" id="delete_starting_measure" size="5"/>
+                beat <input type="text" id="delete_starting_beat" size="5"/>
+        
+                <p></p>
+        
+                <p id="delete_from_end">(Enter a number of beats then click here to delete from the end)</p>
+            </div>
+        
+            <div>
+                <button type="button" id="delete_btn">Delete Beats</button>
+            </div>
+            
+            <br>
+
+            <div>
+                Copy <input type="text" id="repeat_duration" size="5"/> beats starting at
+                measure <input type="text" id="copy_from_starting_measure" size="5"/>
+                beat <input type="text" id="copy_from_starting_beat" size="5"/>...
+                <p></p>
+                ... and paste starting at measure <input type="text" id="paste_to_starting_measure" size="5"/>
+                beat <input type="text" id="paste_to_starting_beat" size="5"/>
+
+                <p></p>
+
+                <p id="paste_to_end">(Click here to paste at the end)</p>
+            </div>
+
+            <div>
+                <button type="button" id="repeat_btn">Copy and Paste</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // TO-DO:
+
+        // Transpose function
+
+        function get_song_length()
+        {
+            let total_beats = 0
+
+            for(let chord of current_song)
+            {
+                total_beats += chord.duration
+            }
+            
+            return total_beats
+        }
+
+        function get_midi()
+        {
+            let note_to_code = 
+            {
+                C: 24, D: 26, E: 28, F: 29, G: 31, A: 33, B: 35
+            }
+
+            let char = root_note.value.charAt(0)
+            let root_code = note_to_code[char]
+
+            if(root_note.value.length == 2)
+            {
+                if(root_note.value.charAt(1) == "#")
+                {
+                    root_code += 1
+                }
+
+                else if(root_note.value.charAt(1) == "b")
+                {
+                    root_code -= 1
+                }
+            }
+
+            root_code += (parseInt(root_octave.value) - 1) * 12
+
+            return root_code
+        }
+
+        function get_midi_obj_arr(arr)
+        {
+            let midi_arr = []
+
+            for(let num of arr)
+            {
+                midi_arr.push(Tone.Midi(num))
+            }
+
+            return midi_arr
+        }
+
+        function get_chord(quality, root, seventh_opt, inversion)
+        {
+            let arr = []
+
+            arr.push(root)
+
+            switch(quality)
+            {
+                case "maj":
+                    arr.push(root + 4)
+                    arr.push(root + 7)
+
+                    switch(seventh_opt)
+                    {
+                        case "maj":
+                            arr.push(root + 11)
+                            break
+                        
+                        case "min":
+                            arr.push(root + 10)
+                            break
+                        default:
+                            arr.push(-1)
+                            break
+                    }
+
+                    break
+
+                case "min":
+                    arr.push(root + 3)
+                    arr.push(root + 7)
+
+                    switch(seventh_opt)
+                    {
+                        case "maj":
+                            arr.push(root + 11)
+                            break
+                        
+                        case "min":
+                            arr.push(root + 10)
+                            break
+                        default:
+                            arr.push(-1)
+                            break
+                    }
+
+                    break
+                
+                case "dim":
+                    arr.push(root + 3)
+                    arr.push(root + 6)
+
+                    switch(seventh_opt)
+                    {
+                        case "min":
+                            arr.push(root + 10)
+                            break
+                        
+                        case "dim":
+                            arr.push(root + 9)
+                            break
+                        default:
+                            arr.push(-1)
+                            break
+                    }
+
+                    break
+
+                case "aug":
+                    arr.push(root + 4)
+                    arr.push(root + 8)
+
+                    switch(seventh_opt)
+                    {
+                        case "maj":
+                            arr.push(root + 11)
+                            break
+                        
+                        case "min":
+                            arr.push(root + 10)
+                            break
+                        default:
+                            arr.push(-1)
+                            break
+                    }
+
+                    break
+            }
+
+            switch(inversion)
+            {
+                case "0":
+                    break
+                case "1":
+                    arr.push(arr[0] + 12)
+                    arr.splice(0, 1)
+                    break
+                case "2":
+                    arr.push(arr[0] + 12)
+                    arr.push(arr[1] + 12)
+                    arr.splice(0, 2)
+                    break
+                case "3":
+                    arr.push(arr[0] + 12)
+                    arr.push(arr[1] + 12)
+                    arr.push(arr[2] + 12)
+                    arr.splice(0, 3)
+            }
+
+            return arr
+        }
+
+        function get_quality()
+        {
+            let qual_btns = document.querySelectorAll(".quality_buttons")
+            let checked_btn = null
+
+            for(let btn of qual_btns)
+            {
+                if(btn.checked == true)
+                {
+                    checked_btn = btn
+                }
+            }
+
+            return checked_btn.value
+        }
+
+        function get_seventh()
+        {
+            let sev_btns = document.querySelectorAll(".seventh_buttons")
+            let checked_btn = null
+
+            for(let btn of sev_btns)
+            {
+                if(btn.checked == true)
+                {
+                    checked_btn = btn
+                }
+            }
+
+            return checked_btn.value
+        }
+
+        function get_inversion()
+        {
+            let inv_btns = document.querySelectorAll(".inversion_buttons")
+            let checked_btn = null
+
+            for(let btn of inv_btns)
+            {
+                if(btn.checked == true)
+                {
+                    checked_btn = btn
+                }
+            }
+
+            return checked_btn.value
+        }
+
+        function play_chord()
+        {
+            let qual = get_quality()
+            let sev = get_seventh()
+            let inv = get_inversion()
+            let root = get_midi()
+
+            let midi_arr = get_midi_obj_arr(get_chord(qual, root, sev, inv))
+
+            synth.triggerAttackRelease(midi_arr, "2n")
+        }
+
+        function print_chord(chord_str, dur)
+        {
+            let all_p = Array.from(current_song_text.children)
+            let last_p = all_p[all_p.length - 1]
+            
+            let last_line = last_p.innerHTML
+            
+            if(last_line.length == 8 * current_time_sig)
+            {
+                let new_p = document.createElement("p")
+                current_song_text.appendChild(new_p)
+                last_p = new_p
+                last_line = ""
+            }
+
+            last_line += chord_str
+            last_p.innerHTML = last_line
+
+            for(let i = 0; i < dur - 1; i++)
+            {
+                if(last_line.length == 8 * current_time_sig)
+                {
+                    let new_p = document.createElement("p")
+                    current_song_text.appendChild(new_p)
+                    last_p = new_p
+                    last_line = ""
+                }
+
+                last_line += "------- "
+                last_p.innerHTML = last_line
+            }
+        }
+
+        function new_song()
+        { 
+            current_song = []
+
+            while(current_song_text.firstChild)
+            {
+                current_song_text.removeChild(current_song_text.firstChild)
+            }
+
+            current_song_text.appendChild(document.createElement("p"))
+
+            current_tempo = 60
+            current_time_sig = 4
+
+            current_tempo_text.innerHTML = "Tempo: 60"
+            current_time_sig_text.innerHTML = "Beats Per Measure: 4"
+        }
+
+        function prime_song(meas, beat, type, song)
+        {
+            beat_index = (meas - 1) * current_time_sig + beat
+
+            if(type == "start")
+                beat_index -= 1
+            
+            for(let i = 0; i < song.length; i++)
+            {
+                beat_index -= song[i].duration
+
+                if(beat_index == 0)
+                {
+                    if(type == "start")
+                        return i + 1
+
+                    else if(type == "end")
+                        return i
+                }
+
+                else if(beat_index < 0)
+                {
+                    song[i].duration = song[i].duration + beat_index
+
+                    // TO-DO: if duration + beat_index = 0, skip the splicing part... i think?
+
+                    split_chord = 
+                    {
+                        midi_code_arr: song[i].midi_code_arr,
+                        duration: beat_index * -1,
+                        str_rep: song[i].str_rep
+                    }
+
+                    song.splice(i + 1, 0, split_chord)
+                    print_song()
+
+                    if(type == "start")
+                        return i + 1
+
+                    else if(type == "end")
+                        return i
+                }
+            }
+        }
+
+        function add_chord(evt)
+        {
+            let qual = get_quality()
+            let sev = get_seventh()
+            let inv = get_inversion()
+            let root = get_midi()
+
+            current_chord_str += root_note.value
+            if(current_chord_str.length < 2)
+            {
+                current_chord_str += " "
+            }
+
+            switch(qual)
+            {
+                case "dim":
+                    current_chord_str += "o"
+                    break
+                case "min":
+                    current_chord_str += "m"
+                    break
+                case "maj":
+                    current_chord_str += "M"
+                    break
+                case "aug":
+                    current_chord_str += "+"
+                    break
+            }
+
+            switch(sev)
+            {
+                case "none":
+                    current_chord_str += "(--) "
+                    break
+                case "dim":
+                    current_chord_str += "(o7) "
+                    break
+                case "min":
+                    current_chord_str += "(m7) "
+                    break
+                case "maj":
+                    current_chord_str += "(M7) "
+                    break
+            }
+
+            if(evt == "add")
+            {
+                var starting_measure = parseInt(add_starting_measure.value)
+                var starting_beat = parseInt(add_starting_beat.value)
+                var duration = parseInt(add_duration.value)
+            }
+
+            else if(evt == "replace")
+            {
+                var starting_measure = parseInt(replace_starting_measure.value)
+                var starting_beat = parseInt(replace_starting_beat.value)
+                var duration = parseInt(replace_duration.value)
+            }
+
+            current_chord = 
+            {
+                midi_code_arr: get_chord(qual, root, sev, inv),
+                duration: parseInt(duration),
+                str_rep: current_chord_str
+            }
+
+            current_song.splice(prime_song(parseInt(starting_measure), parseInt(starting_beat), "start", current_song), 0, current_chord)
+            print_song()
+            current_chord_str = ""
+        }
+
+        function delete_beats(evt)
+        {
+            if(evt == "delete")
+            {
+                var starting_measure = parseInt(delete_starting_measure.value)
+                var starting_beat = parseInt(delete_starting_beat.value)
+                var duration = parseInt(delete_duration.value)
+            }
+
+            else if (evt == "replace")
+            {
+                var starting_measure = parseInt(replace_starting_measure.value)
+                var starting_beat = parseInt(replace_starting_beat.value)
+                var duration = parseInt(replace_duration.value)
+            }
+            
+            start_index = prime_song(starting_measure, starting_beat, "start", current_song)
+            
+            let delete_displacement = duration - 1
+
+            let full_measures_to_delete = Math.floor(parseInt(delete_displacement) / current_time_sig)
+            let beats_to_delete = delete_displacement % current_time_sig
+
+            let delete_ending_measure = starting_measure + full_measures_to_delete
+            let delete_ending_beat = starting_beat + beats_to_delete
+
+            if(delete_ending_beat >= current_time_sig)
+            {
+                delete_ending_measure += 1
+                delete_ending_beat = delete_ending_beat % current_time_sig
+            }
+
+            end_index = prime_song(delete_ending_measure, delete_ending_beat, "end", current_song)
+
+            current_song.splice(start_index, end_index - start_index + 1)
+
+            print_song()
+        }
+
+        function repeat_beats()
+        {
+            let song_clone = []
+
+            for(let i = 0; i < current_song.length; i++)
+            {
+                song_clone.push(JSON.parse(JSON.stringify(current_song[i])))
+            }
+
+            let copy_start_index = prime_song(parseInt(copy_from_starting_measure.value), parseInt(copy_from_starting_beat.value), "start", song_clone)
+            
+            let copy_displacement = parseInt(repeat_duration.value) - 1
+
+            let full_measures_to_copy = Math.floor(copy_displacement / current_time_sig)
+            let beats_to_copy = copy_displacement % current_time_sig
+
+            let copy_ending_measure = parseInt(copy_from_starting_measure.value) + full_measures_to_copy
+            let copy_ending_beat = parseInt(copy_from_starting_beat.value) + beats_to_copy
+
+            if(copy_ending_beat >= current_time_sig)
+            {
+                copy_ending_measure += 1
+                copy_ending_beat = copy_ending_beat % current_time_sig
+            }
+
+            copy_end_index = prime_song(copy_ending_measure, copy_ending_beat, "end", song_clone)
+
+            song_clone.splice(copy_end_index + 1)
+            song_clone.splice(0, copy_start_index)
+
+            current_song.splice(prime_song(parseInt(paste_to_starting_measure.value), parseInt(paste_to_starting_beat.value), "start", current_song), 0, ...song_clone)
+            print_song()
+        }
+
+        function print_song() // Does NOT erase the current song--just reprints it
+        {
+            while(current_song_text.firstChild)
+            {
+                current_song_text.removeChild(current_song_text.firstChild)
+            }
+
+            current_song_text.appendChild(document.createElement("p"))
+            
+            for(let current_chord of current_song)
+            {
+                print_chord(current_chord.str_rep, current_chord.duration)
+            }
+        }
+
+        async function load_song()
+        {
+            let resp = await fetch("https://api.jsonbin.io/v3/b/64efc06fb89b1e2299d8243d/latest")
+            
+            let server_get = await resp.json()
+
+            let server_songs = server_get.record
+
+            let called_song = server_songs[load_index.value - 1]
+
+            new_song()
+
+            current_tempo = called_song.tempo
+            current_tempo_text.innerHTML = `Tempo: ${current_tempo}`
+            current_time_sig = called_song.time_sig
+            current_time_sig_text.innerHTML = `Beats Per Measure: ${current_time_sig}`
+
+            title.value = called_song.title
+
+            for(let current_chord of called_song.chord_arr)
+            {
+                current_song.push(current_chord)
+            }
+
+            print_song()
+        }
+
+        async function remove_song()
+        {
+            let resp = await fetch("https://api.jsonbin.io/v3/b/64efc06fb89b1e2299d8243d/latest")
+            let server_get = await resp.json()
+            let server_songs = server_get.record
+
+            server_songs.splice(parseInt(remove_song_index.value) - 1, 1)
+
+            let giveResp = await fetch("https://api.jsonbin.io/v3/b/64efc06fb89b1e2299d8243d",
+            {
+                method: 'PUT',
+                headers:
+                {
+                    "Content-Type": "application/json",
+                    "X-Master-Key": "$2b$10$NcpW2rFP851TgVn6DZ4iQu/akYysLsu/UC8B7COjY2WiWzEmsAg4y"
+                },
+                body: JSON.stringify(server_songs)
+            })
+
+            let new_song = await giveResp.json()
+
+            get_songs()
+        }
+
+        async function get_songs()
+        {
+            while(song_list.firstChild)
+            {
+                song_list.removeChild(song_list.firstChild)
+            }
+
+            let resp = await fetch("https://api.jsonbin.io/v3/b/64efc06fb89b1e2299d8243d/latest")
+            
+            let server_get = await resp.json()
+
+            let server_songs = server_get.record
+
+            for(let current_song of server_songs)
+            {
+                let li = document.createElement("li")
+                li.innerHTML = current_song.title
+                song_list.appendChild(li)
+            }
+        }
+
+        function time_from_durations(value, i, arr)
+        {
+            let prev_time = arr[i - 1]?.time
+            value.time = prev_time + (60 / current_tempo) * arr[i - 1]?.duration || 0
+            return value
+        }
+
+        function play_song()
+        {
+            Tone.start()
+
+            synth.triggerAttackRelease("C4", "16n")
+            synth.triggerAttackRelease("C4", "16n", `+${1 * 60 / current_tempo}`)
+            synth.triggerAttackRelease("C4", "16n", `+${2 * 60 / current_tempo}`)
+            synth.triggerAttackRelease("C4", "16n", `+${3 * 60 / current_tempo}`)
+            
+            let notes_and_durations = current_song.map(time_from_durations)
+            
+            let part = new Tone.Part((time, value) =>
+            {
+                synth.triggerAttackRelease(get_midi_obj_arr(value.midi_code_arr), (60 / current_tempo) * value.duration, time + (4 * 60 / current_tempo))
+            }, current_song).start()
+
+            Tone.Transport.start()
+        }
+
+        async function save_song()
+        {
+            let song_obj = 
+            {
+                title: title.value,
+                tempo: current_tempo,
+                time_sig: current_time_sig,
+                chord_arr: current_song
+            }
+
+            let getResp = await fetch("https://api.jsonbin.io/v3/b/64efc06fb89b1e2299d8243d/latest")
+
+            let server_get = await getResp.json()
+
+            let server_songs = server_get.record
+            let song_found = false
+
+            for(var i = 0; i < server_songs.length; i++)
+            {
+                if(server_songs[i].title == song_obj.title)
+                {
+                    server_songs[i] = song_obj
+                    song_found = true
+                    break
+                }
+            }
+
+            if(song_found == false)
+                server_songs.push(song_obj)
+
+            let giveResp = await fetch("https://api.jsonbin.io/v3/b/64efc06fb89b1e2299d8243d",
+            {
+                method: 'PUT',
+                headers:
+                {
+                    "Content-Type": "application/json",
+                    "X-Master-Key": "$2b$10$NcpW2rFP851TgVn6DZ4iQu/akYysLsu/UC8B7COjY2WiWzEmsAg4y"
+                },
+                body: JSON.stringify(server_songs)
+            })
+
+            let new_song = await giveResp.json()
+
+            get_songs()
+        }
+
+        function update_tempo()
+        {
+            let new_tempo_text = `Tempo: ${new_tempo.value}`
+            current_tempo_text.innerHTML = new_tempo_text
+            current_tempo = parseInt(new_tempo.value)
+            new_tempo.value = ""
+        }
+
+        function update_time_sig()
+        {
+            let new_time_sig_text = `Beats Per Measure: ${new_time_sig.value}`
+            current_time_sig_text.innerHTML = new_time_sig_text
+            current_time_sig = parseInt(new_time_sig.value)
+            print_song()
+            new_time_sig.value = ""
+        }
+
+        function get_end_pos(song_len)
+        {
+            let starting_measure = Math.floor(song_len / current_time_sig) + 1
+            let starting_beat = song_len % current_time_sig + 1
+
+            return [starting_measure, starting_beat]
+        }
+
+        function autofill_add_inputs()
+        {
+            measure_beat = get_end_pos(get_song_length())
+            add_starting_measure.value = measure_beat[0]
+            add_starting_beat.value = measure_beat[1]
+        }
+
+        function autofill_delete_inputs()
+        {
+            beats_left = get_song_length() - delete_duration.value
+            
+            measure_beat = get_end_pos(beats_left)
+
+            delete_starting_measure.value = measure_beat[0]
+            delete_starting_beat.value = measure_beat[1]
+        }
+
+        function autofill_paste_inputs()
+        {
+            measure_beat = get_end_pos(get_song_length())
+            paste_to_starting_measure.value = measure_beat[0]
+            paste_to_starting_beat.value = measure_beat[1]
+        }
+
+        let current_song = []
+        let current_tempo = 60
+        let current_time_sig = 4
+
+        let current_chord = null
+        let current_chord_str = ""
+        
+        let synth = new Tone.PolySynth(Tone.Synth).toDestination()
+
+        let song_list = document.querySelector("#song_list")
+
+        let load_index = document.querySelector("#load_index")
+        let load_btn = document.querySelector("#load_btn")
+        load_btn.addEventListener("click", load_song)
+
+        let remove_song_index = document.querySelector("#remove_song_index")
+        let remove_song_btn = document.querySelector("#remove_song_btn")
+        remove_song_btn.addEventListener("click", remove_song)
+        
+        let new_btn = document.querySelector("#new_btn")
+        new_btn.addEventListener("click", new_song)
+
+        let root_note = document.querySelector("#root_note")
+        let root_octave = document.querySelector("#root_octave")
+
+        let quality_buttons = Array.from(document.querySelectorAll(".quality_buttons"))
+        let seventh_buttons = Array.from(document.querySelectorAll(".seventh_buttons"))
+        let inversion_buttons = Array.from(document.querySelectorAll(".inversion_buttons"))
+
+        quality_buttons[0].addEventListener("click", function()
+        {
+            for(let i = 0; i < 4; i++)
+            {
+                seventh_buttons[i].disabled = false;
+            }
+
+            seventh_buttons[3].disabled = true;
+        })
+
+        quality_buttons[1].addEventListener("click", function()
+        {
+            for(let i = 0; i < 4; i++)
+            {
+                seventh_buttons[i].disabled = false;
+            }
+
+            seventh_buttons[1].disabled = true;
+        })
+
+        quality_buttons[2].addEventListener("click", function()
+        {
+            for(let i = 0; i < 4; i++)
+            {
+                seventh_buttons[i].disabled = false;
+            }
+
+            seventh_buttons[1].disabled = true;
+        })
+
+        quality_buttons[3].addEventListener("click", function()
+        {
+            for(let i = 0; i < 4; i++)
+            {
+                seventh_buttons[i].disabled = false;
+            }
+
+            seventh_buttons[1].disabled = true;
+        })
+
+        // now why did i not do these using classes instead of id's...
+
+        seventh_buttons[0].addEventListener("click", function()
+        {
+            for(let i = 0; i < 4; i++)
+            {
+                inversion_buttons[i].disabled = false;
+            }
+
+            inversion_buttons[3].disabled = true;
+        })
+
+        seventh_buttons[1].addEventListener("click", function()
+        {
+            for(let i = 0; i < 4; i++)
+            {
+                inversion_buttons[i].disabled = false;
+            }
+        })
+        
+        seventh_buttons[2].addEventListener("click", function()
+        {
+            for(let i = 0; i < 4; i++)
+            {
+                inversion_buttons[i].disabled = false;
+            }
+        })
+
+        seventh_buttons[3].addEventListener("click", function()
+        {
+            for(let i = 0; i < 4; i++)
+            {
+                inversion_buttons[i].disabled = false;
+            }
+        })
+
+        let play_btn = document.querySelector("#play_btn")
+        play_btn.addEventListener("click", play_chord)
+
+        let add_duration = document.querySelector("#add_duration")
+        let add_starting_measure = document.querySelector("#add_starting_measure")
+        let add_starting_beat = document.querySelector("#add_starting_beat")
+        
+        let add_to_end = document.querySelector("#add_to_end")
+        add_to_end.addEventListener("click", autofill_add_inputs)
+
+        let add_btn = document.querySelector("#add_btn")
+        add_btn.btn_type = "add"
+
+        let replace_duration = document.querySelector("#replace_duration")
+        let replace_starting_measure = document.querySelector("#replace_starting_measure")
+        let replace_starting_beat = document.querySelector("#replace_starting_beat")
+
+        let replace_btn = document.querySelector("#replace_btn")
+        replace_btn.btn_type = "replace"
+
+        let delete_duration = document.querySelector("#delete_duration")
+        let delete_starting_measure = document.querySelector("#delete_starting_measure")
+        let delete_starting_beat = document.querySelector("#delete_starting_beat")
+
+        let delete_from_end = document.querySelector("#delete_from_end")
+        delete_from_end.addEventListener("click", autofill_delete_inputs)
+
+        let delete_btn = document.querySelector("#delete_btn")
+        delete_btn.btn_type = "delete"
+
+        let repeat_duration = document.querySelector("#repeat_duration")
+        let copy_from_starting_measure = document.querySelector("#copy_from_starting_measure")
+        let copy_from_starting_beat = document.querySelector("#copy_from_starting_beat")
+
+        let paste_to_starting_measure = document.querySelector("#paste_to_starting_measure")
+        let paste_to_starting_beat = document.querySelector("#paste_to_starting_beat")
+        
+        let paste_to_end = document.querySelector("#paste_to_end")
+        paste_to_end.addEventListener("click", autofill_paste_inputs)
+
+        let repeat_btn = document.querySelector("#repeat_btn")
+
+        add_btn.addEventListener("click", function() {
+            add_chord("add")
+        })
+        replace_btn.addEventListener("click", function() {
+            delete_beats("replace")
+            add_chord("replace")
+        })
+        delete_btn.addEventListener("click", function() {
+            delete_beats("delete")
+        })
+        repeat_btn.addEventListener("click", repeat_beats)
+
+        let current_song_text = document.querySelector("#current_song_text")
+
+        let current_tempo_text = document.querySelector("#current_tempo_text")
+        let new_tempo = document.querySelector("#new_tempo")
+        let update_tempo_btn = document.querySelector("#update_tempo_btn")
+        update_tempo_btn.addEventListener("click", update_tempo)
+
+        let current_time_sig_text = document.querySelector("#current_time_sig_text")
+        let new_time_sig = document.querySelector("#new_time_sig")
+        let update_time_sig_btn = document.querySelector("#update_time_sig_btn")
+        update_time_sig_btn.addEventListener("click", update_time_sig)
+
+        let play_song_btn = document.querySelector("#play_song_btn")
+        play_song_btn.addEventListener("click", play_song)
+
+        let title = document.querySelector("#title")
+        let save_btn = document.querySelector("#save_btn")
+        save_btn.addEventListener("click", save_song)
+
+        get_songs()
+    </script>
+</body>
+</html>
